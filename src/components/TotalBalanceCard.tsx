@@ -26,7 +26,7 @@ export default function TotalBalanceCard({ accounts }: TotalBalanceCardProps) {
         </div>
         <div className="ml-4">
           <p className="text-sm font-medium text-gray-500">Total Saldo</p>
-          <p className="text-2xl font-bold text-gray-800">{formattedTotalBalance}</p>
+          <p className="text-xl font-bold text-gray-800">{formattedTotalBalance}</p>
         </div>
       </div>
     </div>
