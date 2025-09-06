@@ -125,7 +125,7 @@ export default function BudgetingPage() {
   if (pageLoading || authLoading) return <div>Loading...</div>;
 
   return (
-    <div className="p-8">
+    <div className="lg:ml-64 p-8">
       <Toaster />
       <div className="max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-8">
