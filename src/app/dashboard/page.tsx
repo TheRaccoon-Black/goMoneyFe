@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { LogOut } from 'lucide-react';
 
+
 // --- INTERFACES ---
 interface UserProfile { id: number; name: string; email: string; }
 interface Account { ID: number; Name: string; Balance: number; }
@@ -134,14 +135,6 @@ export default function DashboardPage() {
   return (
     <>
       <div className="min-h-screen bg-gray-50">
-        <aside className="fixed inset-y-0 left-0 bg-white w-64 border-r p-6 hidden lg:flex flex-col">
-          <h1 className="text-2xl font-bold text-blue-600 mb-10">GoMoney.</h1>
-          <nav className="flex-grow">{/* Menu items can go here */}</nav>
-          <Button variant="ghost" onClick={handleLogout} className="w-full justify-start bg-red-600 hover:bg-red-400 text-white hover:text-white">
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Logout</span>
-          </Button>
-        </aside>
 
         <main className="lg:ml-64 p-8">
           <div className="max-w-5xl mx-auto space-y-8">
