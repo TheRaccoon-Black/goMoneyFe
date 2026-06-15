@@ -1,14 +1,14 @@
 'use client';
 
+import { Wallet } from 'lucide-react';
+
 interface Account {
   ID: number;
   Name: string;
   Balance: number;
 }
 
-// Komponen ini menerima satu properti (prop) yaitu 'account'
 export default function AccountCard({ account }: { account: Account }) {
-  // Format angka menjadi format mata uang Rupiah
   const formattedBalance = new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
@@ -16,9 +16,14 @@ export default function AccountCard({ account }: { account: Account }) {
   }).format(account.Balance);
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
-      <h3 className="text-lg font-semibold text-gray-800">{account.Name}</h3>
-      <p className="text-2xl font-bold text-blue-600 mt-2">{formattedBalance}</p>
+    <div className="group p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all cursor-pointer">
+      <div className="flex items-center justify-between mb-3">
+        <div className="bg-gray-50 p-2 rounded-lg group-hover:bg-gray-100 transition-colors">
+          <Wallet className="h-4 w-4 text-gray-600" />
+        </div>
+      </div>
+      <p className="text-sm font-medium text-gray-900 mb-0.5 truncate">{account.Name}</p>
+      <p className="text-base font-semibold text-gray-900">{formattedBalance}</p>
     </div>
   );
 }

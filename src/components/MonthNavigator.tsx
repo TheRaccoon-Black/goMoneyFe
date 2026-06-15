@@ -1,4 +1,5 @@
 'use client';
+
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from './ui/button';
 
@@ -22,12 +23,12 @@ export default function MonthNavigator({ currentDate, setCurrentDate }: MonthNav
   }).format(currentDate);
 
   return (
-    <div className="flex items-center justify-center space-x-4">
-      <Button variant="outline" size="icon" onClick={handlePrevMonth}>
+    <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1">
+      <Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-white" onClick={handlePrevMonth}>
         <ChevronLeft className="h-4 w-4" />
       </Button>
-      <span className="text-lg font-semibold w-36 text-center">{formattedDate}</span>
-      <Button variant="outline" size="icon" onClick={handleNextMonth}>
+      <span className="text-sm font-medium w-32 text-center text-gray-700">{formattedDate}</span>
+      <Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-white" onClick={handleNextMonth}>
         <ChevronRight className="h-4 w-4" />
       </Button>
     </div>

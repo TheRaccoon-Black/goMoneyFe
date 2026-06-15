@@ -27,8 +27,16 @@ export default function LoginPage() {
       alert('Login Berhasil! Kita akan segera simpan token ini.'); // Placeholder
 
       router.push('/dashboard');
-    } catch (err) {
-      setError('Email atau password salah.');
+    } catch (err: unknown) {
+      console.error('Login error:', err);
+      const axiosErr = err as { response?: { data?: { error?: string }; status?: number }; message?: string };
+      if (axiosErr.response?.data?.error) {
+        setError(axiosErr.response.data.error);
+      } else if (axiosErr.message) {
+        setError(`Error: ${axiosErr.message}`);
+      } else {
+        setError('Email atau password salah.');
+      }
     }
   };
 

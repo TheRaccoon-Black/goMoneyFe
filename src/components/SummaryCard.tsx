@@ -4,7 +4,7 @@ import { ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
 interface SummaryCardProps {
   title: string;
   amount: number;
-  type: 'income' | 'expense';
+  type: 'income' | 'expense' | 'savings';
 }
 
 export default function SummaryCard({ title, amount, type }: SummaryCardProps) {
@@ -14,21 +14,38 @@ export default function SummaryCard({ title, amount, type }: SummaryCardProps) {
     minimumFractionDigits: 0,
   }).format(amount);
 
-  const isIncome = type === 'income';
+  const config = {
+    income: {
+      icon: ArrowUpCircle,
+      iconColor: 'text-emerald-600',
+      iconBg: 'bg-emerald-50',
+      amountColor: 'text-emerald-600',
+    },
+    expense: {
+      icon: ArrowDownCircle,
+      iconColor: 'text-red-500',
+      iconBg: 'bg-red-50',
+      amountColor: 'text-red-500',
+    },
+    savings: {
+      icon: ArrowUpCircle,
+      iconColor: 'text-blue-600',
+      iconBg: 'bg-blue-50',
+      amountColor: 'text-gray-900',
+    },
+  }[type];
+
+  const Icon = config.icon;
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-gray-500">{title}</p>
-        {isIncome ? (
-          <ArrowUpCircle className="h-6 w-6 text-green-500" />
-        ) : (
-          <ArrowDownCircle className="h-6 w-6 text-red-500" />
-        )}
+    <div className="bg-white rounded-2xl p-5 border border-gray-100 hover:border-gray-200 transition-colors">
+      <div className="flex items-center justify-between mb-3">
+        <div className={`${config.iconBg} p-2 rounded-lg`}>
+          <Icon className={`h-4 w-4 ${config.iconColor}`} />
+        </div>
       </div>
-      <p className={`text-lg font-bold mt-2 ${isIncome ? 'text-green-600' : 'text-red-600'}`}>
-        {formattedAmount}
-      </p>
+      <p className="text-xs font-medium text-gray-500 mb-1">{title}</p>
+      <p className={`text-xl font-semibold tracking-tight ${config.amountColor}`}>{formattedAmount}</p>
     </div>
   );
 }

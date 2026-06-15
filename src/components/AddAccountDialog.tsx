@@ -26,11 +26,12 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import type { Resolver } from 'react-hook-form';
 
 // Definisikan skema validasi form
 const formSchema = z.object({
   name: z.string().min(1, { message: 'Nama akun tidak boleh kosong.' }),
-  balance: z.coerce.number().min(0, { message: 'Saldo awal tidak boleh negatif.' }),
+  balance: z.preprocess((val) => (typeof val === 'string' ? parseFloat(val) : val), z.number().min(0, { message: 'Saldo awal tidak boleh negatif.' })),
 });
 
 // Tentukan tipe data untuk Akun baru
@@ -46,8 +47,10 @@ interface AddAccountDialogProps {
 
 export default function AddAccountDialog({ onAccountAdded }: AddAccountDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  interface FormValues { name: string; balance: number; }
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema) as unknown as Resolver<FormValues>,
     defaultValues: {
       name: '',
       balance: 0,
@@ -74,11 +77,11 @@ export default function AddAccountDialog({ onAccountAdded }: AddAccountDialogPro
       <DialogTrigger asChild>
         <Button>Tambah Akun</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] rounded-2xl">
         <DialogHeader>
-          <DialogTitle>Buat Akun Baru</DialogTitle>
+          <DialogTitle>New Account</DialogTitle>
           <DialogDescription>
-            Buat akun baru untuk melacak keuangan Anda.
+            Create a new account to track your finances.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

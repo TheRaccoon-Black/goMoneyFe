@@ -1,39 +1,52 @@
-// file: src/app/dashboard/page.tsx
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useMemo, useCallback } from 'react';
+import { Plus } from 'lucide-react';
 import apiClient from '@/lib/axios';
 
-// Import semua komponen UI dan custom
 import AccountCard from '@/components/AccountCard';
 import TransactionRow from '@/components/TransactionRow';
 import TransactionFormDialog from '@/components/TransactionFormDialog';
 import AddAccountDialog from '@/components/AddAccountDialog';
 import TotalBalanceCard from '@/components/TotalBalanceCard';
 import CategoryDonutChart from '@/components/CategoryDonutChart';
-import MonthNavigator from '@/components/MonthNavigator';
 import SummaryCard from '@/components/SummaryCard';
+import DashboardHeader from '@/components/DashboardHeader';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { LogOut } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
-
-// --- INTERFACES ---
 interface UserProfile { id: number; name: string; email: string; }
 interface Account { ID: number; Name: string; Balance: number; }
 interface SubCategory { ID: number; Name: string; }
 interface Category { ID: number; Name: string; Type: string; SubCategories: SubCategory[]; }
-interface Transaction { ID: number; Notes?: string; Amount: number; Type: 'income' | 'expense' | 'transfer'; TransactionDate: string; Account: { ID: number; Name: string; }; SubCategory?: { ID: number; Name: string; Category: { Name: string; }; }; DestinationAccountID?: number; }
+interface Transaction {
+  ID: number;
+  Notes?: string;
+  Amount: number;
+  Type: 'income' | 'expense' | 'transfer';
+  TransactionDate: string;
+  Account: { ID: number; Name: string; };
+  SubCategory?: { ID?: number; Name: string; Category: { Name: string; }; };
+  DestinationAccountID?: number;
+}
 interface GroupedTransaction { date: string; transactions: Transaction[]; dailyIncome: number; dailyExpense: number; }
 
 export default function DashboardPage() {
   const { token, loading: authLoading, logout } = useAuth();
   const router = useRouter();
-  
-  // --- STATE MANAGEMENT ---
+
   const [currentDate, setCurrentDate] = useState(new Date());
   const [user, setUser] = useState<UserProfile | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
@@ -41,14 +54,12 @@ export default function DashboardPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [pageLoading, setPageLoading] = useState(true);
 
-  // State untuk mengelola semua dialog
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null);
 
-  // --- DATA FETCHING & PROCESSING ---
   const fetchData = useCallback(async () => {
     if (!token) return;
     setPageLoading(true);
@@ -100,11 +111,11 @@ export default function DashboardPage() {
         if (tx.Type === 'income') acc.income += tx.Amount;
         if (tx.Type === 'expense') acc.expense += tx.Amount;
         return acc;
-      }, { income: 0, expense: 0 }
+      },
+      { income: 0, expense: 0 }
     );
   }, [transactions]);
 
-  // --- HANDLERS ---
   const handleAccountAdded = (newAccount: Account) => { setAccounts(prev => [...prev, newAccount]); };
   const handleFormSubmit = async () => { await fetchData(); };
   const handleEditClick = (transaction: Transaction) => { setTransactionToEdit(transaction); setIsEditDialogOpen(true); };
@@ -114,19 +125,30 @@ export default function DashboardPage() {
     try {
       await apiClient.delete(`/api/transactions/${transactionToDelete.ID}`);
       await fetchData();
-    } catch (error) { console.error("Failed to delete transaction", error);
-    } finally { setIsDeleteDialogOpen(false); setTransactionToDelete(null); }
+    } catch (error) {
+      console.error("Failed to delete transaction", error);
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setTransactionToDelete(null);
+    }
   };
-  const handleLogout = () => { logout(); router.push('/login'); };
 
-  // --- RENDER LOGIC ---
   if (pageLoading || authLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 p-8 lg:ml-64">
-        <div className="max-w-5xl mx-auto space-y-8">
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-48 w-full" />
-          <Skeleton className="h-64 w-full" />
+      <div className="space-y-8">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-64" />
+          <Skeleton className="h-4 w-48" />
+        </div>
+        <Skeleton className="h-48 w-full rounded-2xl" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Skeleton className="h-32 rounded-2xl" />
+          <Skeleton className="h-32 rounded-2xl" />
+          <Skeleton className="h-32 rounded-2xl" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Skeleton className="h-96 rounded-2xl" />
+          <Skeleton className="h-96 rounded-2xl" />
         </div>
       </div>
     );
@@ -134,94 +156,124 @@ export default function DashboardPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50">
+      <DashboardHeader
+        user={user || undefined}
+        currentDate={currentDate}
+        setCurrentDate={setCurrentDate}
+        onAddTransaction={() => setIsAddDialogOpen(true)}
+      />
 
-        <main className="lg:ml-64 p-8">
-          <div className="max-w-5xl mx-auto space-y-8">
-            {/* Header */}
-            <div className="flex flex-wrap justify-between items-center gap-4">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-                {user && <p className="text-lg text-gray-600">Selamat datang, {user.name}!</p>}
-              </div>
-              <MonthNavigator currentDate={currentDate} setCurrentDate={setCurrentDate} />
-            </div>
+      {/* Hero: Total Balance */}
+      <TotalBalanceCard
+        accounts={accounts}
+        monthlyIncome={monthlyTotals.income}
+        monthlyExpense={monthlyTotals.expense}
+      />
 
-            {/* Grid Info Utama */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <TotalBalanceCard accounts={accounts} />
-              <SummaryCard title="Total Pemasukan" amount={monthlyTotals.income} type="income" />
-              <SummaryCard title="Total Pengeluaran" amount={monthlyTotals.expense} type="expense" />
-            </div>
-            
-            {/* Bagian Akun */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-semibold text-gray-700">Akun Anda</h2>
-                <AddAccountDialog onAccountAdded={handleAccountAdded} />
-              </div>
-              {accounts.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {accounts.map((account) => <AccountCard key={account.ID} account={account} />)}
-                </div>
-              ) : (
-                <p className="text-gray-500">Anda belum memiliki akun.</p>
-              )}
-            </div>
-
-            {/* Chart & Transaksi */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-1 bg-white p-6 rounded-lg shadow-md border">
-                <h2 className="text-xl font-semibold text-gray-700 mb-4">Pengeluaran Bulan Ini</h2>
-                <CategoryDonutChart transactions={transactions} />
-              </div>
-              <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-md border">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-2xl font-semibold text-gray-700">Riwayat Transaksi</h2>
-                  <Button onClick={() => setIsAddDialogOpen(true)}>+ Transaksi</Button>
-                </div>
-                <div className="max-h-[400px] overflow-y-auto">
-                  {groupedTransactions.length > 0 ? (
-                    <div className="space-y-6">
-                      {groupedTransactions.map(group => (
-                        <div key={group.date}>
-                          <div className="flex justify-between items-center bg-gray-50 p-2 rounded-t-lg border-b sticky top-0">
-                            <p className="font-semibold text-gray-700">{new Date(group.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
-                            <div className="flex space-x-4 text-xs">
-                              <p className="font-medium text-green-600">+ {new Intl.NumberFormat('id-ID').format(group.dailyIncome)}</p>
-                              <p className="font-medium text-red-600">- {new Intl.NumberFormat('id-ID').format(group.dailyExpense)}</p>
-                            </div>
-                          </div>
-                          <div className="space-y-2 pt-2">
-                            {group.transactions.map(tx => <TransactionRow key={tx.ID} tx={tx} onDelete={handleDeleteClick} onEdit={handleEditClick} />)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-10"><p className="text-gray-500">Belum ada transaksi di bulan ini.</p></div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
+      {/* Summary metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        <SummaryCard title="Income" amount={monthlyTotals.income} type="income" />
+        <SummaryCard title="Expense" amount={monthlyTotals.expense} type="expense" />
+        <SummaryCard title="Net Savings" amount={monthlyTotals.income - monthlyTotals.expense} type="savings" />
       </div>
 
-      {/* DIALOGS */}
+      {/* Two-column main grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
+        {/* Spending breakdown */}
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="mb-4">
+            <h2 className="text-base font-semibold text-gray-900">Spending by Category</h2>
+            <p className="text-xs text-gray-500 mt-0.5">This month&apos;s expenses</p>
+          </div>
+          <CategoryDonutChart transactions={transactions} />
+        </div>
+
+        {/* Accounts */}
+        <div className="lg:col-span-3 bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">Your Accounts</h2>
+              <p className="text-xs text-gray-500 mt-0.5">{accounts.length} active accounts</p>
+            </div>
+            <AddAccountDialog onAccountAdded={handleAccountAdded} />
+          </div>
+          {accounts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {accounts.map((account) => <AccountCard key={account.ID} account={account} />)}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-sm text-gray-500">No accounts yet.</div>
+          )}
+        </div>
+      </div>
+
+      {/* Recent transactions */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 mt-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-base font-semibold text-gray-900">Recent Transactions</h2>
+            <p className="text-xs text-gray-500 mt-0.5">Your activity for this month</p>
+          </div>
+        </div>
+        <div className="max-h-[480px] overflow-y-auto -mx-2 px-2">
+          {groupedTransactions.length > 0 ? (
+            <div className="space-y-6">
+              {groupedTransactions.map(group => (
+                <div key={group.date}>
+                  <div className="flex justify-between items-center px-3 py-2 mb-1">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                      {new Date(group.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    </p>
+                    <div className="flex gap-3 text-xs">
+                      <span className="text-emerald-600 font-medium">+{new Intl.NumberFormat('id-ID').format(group.dailyIncome)}</span>
+                      <span className="text-red-500 font-medium">-{new Intl.NumberFormat('id-ID').format(group.dailyExpense)}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    {group.transactions.map(tx => (
+                      <TransactionRow key={tx.ID} tx={tx} onDelete={handleDeleteClick} onEdit={handleEditClick} />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-sm text-gray-500">No transactions yet this month.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Floating action button */}
+      <Button
+        onClick={() => setIsAddDialogOpen(true)}
+        size="icon"
+        className="lg:hidden fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-30"
+      >
+        <Plus className="h-6 w-6" />
+        <span className="sr-only">Add Transaction</span>
+      </Button>
+
+      {/* Delete dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Apakah Anda Yakin?</AlertDialogTitle>
-            <AlertDialogDescription>Tindakan ini akan menghapus data transaksi secara permanen dan mengembalikan saldo akun yang terkait.</AlertDialogDescription>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this transaction and restore the associated account balance.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDelete} className="bg-red-600 hover:bg-red-700">Ya, Hapus</AlertDialogAction>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      
+
+      {/* Add dialog */}
       <TransactionFormDialog
         mode="add"
         accounts={accounts}
@@ -231,6 +283,7 @@ export default function DashboardPage() {
         setIsOpen={setIsAddDialogOpen}
       />
 
+      {/* Edit dialog */}
       {transactionToEdit && (
         <TransactionFormDialog
           mode="edit"

@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
@@ -30,7 +30,7 @@ interface Transaction {
   Type: 'income' | 'expense' | 'transfer';
   TransactionDate: string;
   Account: { ID: number; Name: string; };
-  SubCategory?: { ID: number; Name: string; Category: { Name: string; }; };
+  SubCategory?: { ID?: number; Name: string; Category: { Name: string; }; };
   DestinationAccountID?: number;
 }
 
@@ -41,7 +41,7 @@ const formSchema = z.object({
   account_id: z.string().min(1, { message: 'Akun harus dipilih.' }),
   sub_category_id: z.string().optional(),
   destination_account_id: z.string().optional(),
-  transaction_date: z.date({ required_error: 'Tanggal harus diisi.' }),
+  transaction_date: z.date(),
   notes: z.string().optional(),
 }).refine(data => data.type === 'transfer' ? !!data.destination_account_id && data.destination_account_id !== '' : true, {
   message: 'Akun tujuan harus dipilih untuk transfer.', path: ['destination_account_id'],
@@ -61,8 +61,18 @@ interface TransactionFormDialogProps {
 }
 
 export default function TransactionFormDialog({ accounts, categories, onFormSubmit, mode, initialData, isOpen, setIsOpen }: TransactionFormDialogProps) {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  interface FormValues {
+    type: 'expense' | 'income' | 'transfer';
+    amount: number;
+    account_id: string;
+    sub_category_id?: string;
+    destination_account_id?: string;
+    transaction_date: Date;
+    notes?: string;
+  }
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema) as unknown as Resolver<FormValues>,
   });
 
   const transactionType = form.watch('type');
@@ -75,7 +85,7 @@ export default function TransactionFormDialog({ accounts, categories, onFormSubm
         transaction_date: new Date(initialData.TransactionDate),
         amount: initialData.Amount,
         account_id: initialData.Account.ID.toString(),
-        sub_category_id: initialData.SubCategory?.ID.toString() || '',
+        sub_category_id: initialData.SubCategory?.ID?.toString() || '',
         destination_account_id: initialData.DestinationAccountID?.toString() || '',
         notes: initialData.Notes || '',
       });
@@ -122,9 +132,9 @@ export default function TransactionFormDialog({ accounts, categories, onFormSubm
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md rounded-2xl">
         <DialogHeader>
-          <DialogTitle>{mode === 'add' ? 'Catat Transaksi Baru' : 'Edit Transaksi'}</DialogTitle>
+          <DialogTitle>{mode === 'add' ? 'New Transaction' : 'Edit Transaction'}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-h-[80vh] overflow-y-auto p-4">
