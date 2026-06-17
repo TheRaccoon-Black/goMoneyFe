@@ -194,13 +194,13 @@ export default function CategoriesPage() {
       {/* === Header === */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-sm text-slate-500 mb-1">
+          <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-1">
             <span>Beranda</span>
             <ChevronRight className="h-3.5 w-3.5" />
-            <span className="text-slate-700 font-medium">Manajemen Kategori</span>
+            <span className="text-slate-700 dark:text-slate-200 font-medium">Manajemen Kategori</span>
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Kategori Transaksi</h1>
-          <p className="text-slate-500 mt-0.5">
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Kategori Transaksi</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-0.5">
             Kelola kategori dan sub-kategori untuk transaksi keuangan Anda.
           </p>
         </div>
@@ -235,9 +235,9 @@ export default function CategoriesPage() {
         </div>
 
         {/* === Tabs + Search === */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b border-slate-200">
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg w-fit">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b border-slate-200 dark:border-slate-800">
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg w-fit">
               <TabButton
                 active={activeTab === 'expense'}
                 onClick={() => setActiveTab('expense')}
@@ -263,6 +263,14 @@ export default function CategoriesPage() {
                 className="pl-9"
               />
             </div>
+
+            <Button
+              onClick={() => setCatDialog({ open: true, mode: 'add', target: { ID: 0, Name: '', Type: activeTab, SubCategories: [] } })}
+              className="shrink-0"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Tambah Kategori
+            </Button>
           </div>
 
           {/* === Content === */}
@@ -345,7 +353,7 @@ export default function CategoriesPage() {
               </DialogTitle>
               {subDialog.parent && (
                 <DialogDescription>
-                  Pada kategori: <span className="font-medium text-slate-700">{subDialog.parent.Name}</span>
+                  Pada kategori: <span className="font-medium text-slate-700 dark:text-slate-200">{subDialog.parent.Name}</span>
                 </DialogDescription>
               )}
             </DialogHeader>
@@ -420,19 +428,19 @@ function StatCard({
   icon, label, value, color,
 }: { icon: React.ReactNode; label: string; value: number; color: 'slate' | 'emerald' | 'rose' | 'amber' }) {
   const colorMap = {
-    slate: 'bg-slate-100 text-slate-700',
+    slate: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200',
     emerald: 'bg-emerald-100 text-emerald-700',
     rose: 'bg-rose-100 text-rose-700',
     amber: 'bg-amber-100 text-amber-700',
   } as const;
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-3 shadow-sm">
+    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 flex items-center gap-3 shadow-sm">
       <div className={cn('h-10 w-10 rounded-lg flex items-center justify-center', colorMap[color])}>
         {icon}
       </div>
       <div>
-        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{label}</p>
-        <p className="text-2xl font-bold text-slate-900">{value}</p>
+        <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">{label}</p>
+        <p className="text-2xl font-bold text-slate-900 dark:text-white">{value}</p>
       </div>
     </div>
   );
@@ -442,15 +450,15 @@ function TabButton({
   active, onClick, icon, label, color,
 }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string; color: 'emerald' | 'rose' }) {
   const activeMap = {
-    emerald: 'bg-white text-emerald-700 shadow-sm',
-    rose: 'bg-white text-rose-700 shadow-sm',
+    emerald: 'bg-white dark:bg-slate-900 text-emerald-700 shadow-sm',
+    rose: 'bg-white dark:bg-slate-900 text-rose-700 shadow-sm',
   } as const;
   return (
     <button
       onClick={onClick}
       className={cn(
         'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
-        active ? activeMap[color] : 'text-slate-600 hover:text-slate-900'
+        active ? activeMap[color] : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:text-white'
       )}
     >
       {icon}
@@ -476,8 +484,8 @@ function CategoryCard({
 
   return (
     <div className={cn(
-      'group rounded-xl border bg-white shadow-sm hover:shadow-md transition-all overflow-hidden',
-      'border-slate-200 hover:border-slate-300'
+      'group rounded-xl border bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-all overflow-hidden',
+      'border-slate-200 dark:border-slate-800 hover:border-slate-300'
     )}>
       {/* Top accent bar */}
       <div className={cn(
@@ -496,8 +504,8 @@ function CategoryCard({
               <Tag className="h-4 w-4" />
             </div>
             <div className="min-w-0">
-              <h3 className="font-semibold text-slate-900 truncate">{category.Name}</h3>
-              <p className="text-xs text-slate-500">
+              <h3 className="font-semibold text-slate-900 dark:text-white truncate">{category.Name}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 {subs.length} sub-kategori
               </p>
             </div>
@@ -528,14 +536,14 @@ function CategoryCard({
                 {sub.Name}
                 <button
                   onClick={() => onEditSub(sub)}
-                  className="ml-0.5 inline-flex items-center justify-center h-5 w-5 rounded hover:bg-white/60"
+                  className="ml-0.5 inline-flex items-center justify-center h-5 w-5 rounded hover:bg-white dark:bg-slate-900/60"
                   title="Edit sub-kategori"
                 >
                   <Pencil className="h-3 w-3" />
                 </button>
                 <button
                   onClick={() => onDeleteSub(sub)}
-                  className="inline-flex items-center justify-center h-5 w-5 rounded hover:bg-white/60"
+                  className="inline-flex items-center justify-center h-5 w-5 rounded hover:bg-white dark:bg-slate-900/60"
                   title="Hapus sub-kategori"
                 >
                   <Trash2 className="h-3 w-3" />
@@ -569,11 +577,11 @@ function EmptyState({ type, hasSearch, onAdd }: { type: CategoryType; hasSearch:
   if (hasSearch) {
     return (
       <div className="text-center py-12">
-        <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 mb-3">
+        <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 mb-3">
           <Search className="h-6 w-6 text-slate-400" />
         </div>
-        <h3 className="font-semibold text-slate-900">Tidak ditemukan</h3>
-        <p className="text-sm text-slate-500 mt-1">
+        <h3 className="font-semibold text-slate-900 dark:text-white">Tidak ditemukan</h3>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
           Coba kata kunci lain atau hapus pencarian.
         </p>
       </div>
@@ -587,13 +595,13 @@ function EmptyState({ type, hasSearch, onAdd }: { type: CategoryType; hasSearch:
       )}>
         <Wallet className={cn('h-6 w-6', isIncome ? 'text-emerald-600' : 'text-rose-600')} />
       </div>
-      <h3 className="font-semibold text-slate-900">
+      <h3 className="font-semibold text-slate-900 dark:text-white">
         Belum ada kategori {isIncome ? 'pemasukan' : 'pengeluaran'}
       </h3>
-      <p className="text-sm text-slate-500 mt-1 mb-4">
+      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 mb-4">
         Mulai dengan menambahkan kategori pertama Anda.
       </p>
-      <Button onClick={onAdd} variant="outline" className="bg-white">
+      <Button onClick={onAdd} variant="outline" className="bg-white dark:bg-slate-900">
         <Plus className="h-4 w-4 mr-1" /> Tambah Kategori
       </Button>
     </div>

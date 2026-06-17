@@ -6,7 +6,7 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <div className="min-h-screen bg-gray-50/50 dark:bg-slate-950 transition-colors">
       <Sidebar />
       <main className="lg:ml-64 min-h-screen">
         <div className="max-w-7xl mx-auto p-6 lg:p-8">

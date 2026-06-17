@@ -177,8 +177,8 @@ export default function BudgetingPage() {
       <div className="flex flex-col gap-6 mb-8">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Budgeting</h1>
-            <p className="text-sm text-gray-500 mt-0.5">Plan and track your monthly spending by category.</p>
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Budgeting</h1>
+            <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">Plan and track your monthly spending by category.</p>
           </div>
           <MonthNavigator currentDate={currentDate} setCurrentDate={setCurrentDate} />
         </div>
@@ -195,8 +195,8 @@ export default function BudgetingPage() {
         />
         <SummaryMetric
           icon={TrendingUp}
-          iconBg="bg-gray-100"
-          iconColor="text-gray-700"
+          iconBg="bg-gray-100 dark:bg-slate-800"
+          iconColor="text-gray-700 dark:text-slate-200"
           label="Total Spent"
           value={formatCurrency(totals.spent)}
         />
@@ -211,19 +211,19 @@ export default function BudgetingPage() {
       </div>
 
       {/* Overall progress */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 mt-6">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-6 mt-6">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h2 className="text-sm font-semibold text-gray-900">Monthly progress</h2>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Monthly progress</h2>
+            <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
               {overallProgress > 100
                 ? `Over budget by ${formatCurrency(totals.spent - totals.budgeted)}`
                 : `${formatCurrency(totals.budgeted - totals.spent)} left to spend`}
             </p>
           </div>
-          <span className="text-sm font-semibold text-gray-900 tabular-nums">{Math.min(100, overallProgress).toFixed(0)}%</span>
+          <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">{Math.min(100, overallProgress).toFixed(0)}%</span>
         </div>
-        <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-2 w-full bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all ${
               overallProgress >= 100 ? 'bg-red-500' : overallProgress >= 80 ? 'bg-amber-500' : 'bg-emerald-500'
@@ -234,15 +234,15 @@ export default function BudgetingPage() {
       </div>
 
       {/* Category list */}
-      <div className="bg-white rounded-2xl border border-gray-100 mt-6 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-900">Categories</h2>
-          <span className="text-xs text-gray-500">{sortedBudgetData.length} expense categories</span>
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 mt-6 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Categories</h2>
+          <span className="text-xs text-gray-500 dark:text-slate-400">{sortedBudgetData.length} expense categories</span>
         </div>
 
         {sortedBudgetData.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-sm text-gray-500">No expense categories yet. Add one to start budgeting.</p>
+            <p className="text-sm text-gray-500 dark:text-slate-400">No expense categories yet. Add one to start budgeting.</p>
           </div>
         ) : (
           <div>
@@ -262,9 +262,9 @@ export default function BudgetingPage() {
       </div>
 
       {/* Sticky save bar */}
-      <div className="sticky bottom-0 -mx-6 lg:-mx-8 mt-6 px-6 lg:px-8 py-4 bg-white/80 backdrop-blur border-t border-gray-100">
+      <div className="sticky bottom-0 -mx-6 lg:-mx-8 mt-6 px-6 lg:px-8 py-4 bg-white dark:bg-slate-900/80 backdrop-blur border-t border-gray-100 dark:border-slate-800">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-slate-400">
             {Object.values(budgetInputs).filter(v => v && parseFloat(v) > 0).length} categories with budget
           </p>
           <Button onClick={handleSaveBudgets} disabled={saving}>
@@ -292,7 +292,7 @@ function SummaryMetric({
   iconColor,
   label,
   value,
-  valueColor = 'text-gray-900',
+  valueColor = 'text-gray-900 dark:text-white',
 }: {
   icon: React.ElementType;
   iconBg: string;
@@ -302,13 +302,13 @@ function SummaryMetric({
   valueColor?: string;
 }) {
   return (
-    <div className="bg-white rounded-2xl p-5 border border-gray-100">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-gray-100 dark:border-slate-800">
       <div className="flex items-center justify-between mb-3">
         <div className={`${iconBg} p-2 rounded-lg`}>
           <Icon className={`h-4 w-4 ${iconColor}`} />
         </div>
       </div>
-      <p className="text-xs font-medium text-gray-500 mb-1">{label}</p>
+      <p className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">{label}</p>
       <p className={`text-xl font-semibold tracking-tight ${valueColor}`}>{value}</p>
     </div>
   );
@@ -336,19 +336,19 @@ function BudgetRow({
   }[item.status];
 
   return (
-    <div className={`px-6 py-5 ${!isLast ? 'border-b border-gray-100' : ''}`}>
+    <div className={`px-6 py-5 ${!isLast ? 'border-b border-gray-100 dark:border-slate-800' : ''}`}>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
         {/* Category + progress */}
         <div className="lg:col-span-5">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-gray-900">{item.categoryName}</p>
+            <p className="text-sm font-medium text-gray-900 dark:text-white">{item.categoryName}</p>
             {item.budgeted > 0 && (
               <span className={`text-xs font-semibold ${statusColors.text}`}>
                 {item.progress.toFixed(0)}%
               </span>
             )}
           </div>
-          <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-1.5 w-full bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${statusColors.bar}`}
               style={{ width: `${Math.min(100, item.progress)}%` }}
@@ -358,12 +358,12 @@ function BudgetRow({
 
         {/* Spent / Remaining */}
         <div className="lg:col-span-2 text-left lg:text-right">
-          <p className="text-xs text-gray-500">Spent</p>
-          <p className="text-sm font-semibold text-gray-900 tabular-nums">{formatCurrency(item.spent)}</p>
+          <p className="text-xs text-gray-500 dark:text-slate-400">Spent</p>
+          <p className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">{formatCurrency(item.spent)}</p>
         </div>
 
         <div className="lg:col-span-2 text-left lg:text-right">
-          <p className="text-xs text-gray-500">Remaining</p>
+          <p className="text-xs text-gray-500 dark:text-slate-400">Remaining</p>
           <p className={`text-sm font-semibold tabular-nums ${item.remaining < 0 ? 'text-red-500' : 'text-emerald-600'}`}>
             {item.budgeted > 0 ? formatCurrency(item.remaining) : '—'}
           </p>

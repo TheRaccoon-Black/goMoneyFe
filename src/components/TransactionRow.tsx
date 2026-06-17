@@ -71,36 +71,36 @@ export default function TransactionRow({ tx, onDelete, onEdit }: TransactionRowP
   const sign = isIncome ? '+' : isTransfer ? '' : '-';
 
   return (
-    <div className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors group">
+    <div className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-xl transition-colors group">
       <div className={`${config.bg} p-2.5 rounded-xl shrink-0`}>
         <Icon className={`h-4 w-4 ${config.text}`} />
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900 truncate">{title}</p>
-        <p className="text-xs text-gray-500 truncate">{subtitle}</p>
+        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{title}</p>
+        <p className="text-xs text-gray-500 dark:text-slate-400 truncate">{subtitle}</p>
       </div>
 
       <div className="text-right shrink-0">
         <p className={`text-sm font-semibold ${config.text}`}>
           {sign} {formattedAmount}
         </p>
-        <p className="text-xs text-gray-400">{formattedDate}</p>
+        <p className="text-xs text-gray-400 dark:text-slate-500">{formattedDate}</p>
       </div>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 dark:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">
             <span className="sr-only">Open menu</span>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => onEdit(tx)}>
+        <DropdownMenuContent align="end" className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800">
+          <DropdownMenuItem onClick={() => onEdit(tx)} className="text-gray-700 dark:text-slate-200 [&_svg]:text-gray-500 dark:[&_svg]:text-slate-400">
             <Pencil className="mr-2 h-4 w-4" />
             <span>Edit</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onDelete(tx)} className="text-red-600">
+          <DropdownMenuItem onClick={() => onDelete(tx)} className="text-red-600 dark:text-red-400 [&_svg]:text-red-500 dark:[&_svg]:text-red-400">
             <Trash2 className="mr-2 h-4 w-4" />
             <span>Delete</span>
           </DropdownMenuItem>

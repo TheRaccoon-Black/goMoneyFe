@@ -1,7 +1,7 @@
 // file: src/components/TransactionFormDialog.tsx
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -30,7 +30,7 @@ interface Transaction {
   Type: 'income' | 'expense' | 'transfer';
   TransactionDate: string;
   Account: { ID: number; Name: string; };
-  SubCategory?: { ID?: number; Name: string; Category: { Name: string; }; };
+  SubCategory?: { ID?: number; Name: string; Category: { ID?: number; Name: string; }; };
   DestinationAccountID?: number;
 }
 
@@ -41,12 +41,15 @@ const formSchema = z.object({
   account_id: z.string().min(1, { message: 'Akun harus dipilih.' }),
   sub_category_id: z.string().optional(),
   destination_account_id: z.string().optional(),
+  category_id: z.string().optional(),
   transaction_date: z.date(),
   notes: z.string().optional(),
 }).refine(data => data.type === 'transfer' ? !!data.destination_account_id && data.destination_account_id !== '' : true, {
   message: 'Akun tujuan harus dipilih untuk transfer.', path: ['destination_account_id'],
+}).refine(data => data.type !== 'transfer' ? !!data.category_id && data.category_id !== '' : true, {
+  message: 'Kategori harus dipilih.', path: ['category_id'],
 }).refine(data => data.type !== 'transfer' ? !!data.sub_category_id && data.sub_category_id !== '' : true, {
-  message: 'Kategori harus dipilih.', path: ['sub_category_id'],
+  message: 'Sub-kategori harus dipilih.', path: ['sub_category_id'],
 });
 
 // Props untuk komponen
@@ -65,6 +68,7 @@ export default function TransactionFormDialog({ accounts, categories, onFormSubm
     type: 'expense' | 'income' | 'transfer';
     amount: number;
     account_id: string;
+    category_id?: string;
     sub_category_id?: string;
     destination_account_id?: string;
     transaction_date: Date;
@@ -76,15 +80,25 @@ export default function TransactionFormDialog({ accounts, categories, onFormSubm
   });
 
   const transactionType = form.watch('type');
+  const selectedCategoryId = form.watch('category_id');
+  const filteredSubCategories = useMemo(() => {
+    if (!selectedCategoryId) return [];
+    const cat = categories.find(c => c.ID.toString() === selectedCategoryId);
+    return cat?.SubCategories || [];
+  }, [categories, selectedCategoryId]);
 
   useEffect(() => {
     // Isi form dengan data awal jika dalam mode edit saat dialog terbuka
     if (isOpen && mode === 'edit' && initialData) {
+      const parentCategory = initialData.SubCategory
+        ? categories.find(c => c.SubCategories?.some(s => s.ID === initialData.SubCategory?.ID))
+        : undefined;
       form.reset({
         type: initialData.Type,
         transaction_date: new Date(initialData.TransactionDate),
         amount: initialData.Amount,
         account_id: initialData.Account.ID.toString(),
+        category_id: parentCategory?.ID?.toString() || '',
         sub_category_id: initialData.SubCategory?.ID?.toString() || '',
         destination_account_id: initialData.DestinationAccountID?.toString() || '',
         notes: initialData.Notes || '',
@@ -96,26 +110,37 @@ export default function TransactionFormDialog({ accounts, categories, onFormSubm
         transaction_date: new Date(),
         amount: 0,
         account_id: '',
+        category_id: '',
         sub_category_id: '',
         destination_account_id: '',
         notes: '',
       });
     }
-  }, [isOpen, initialData, mode, form]);
-  
-  // Reset field kategori saat tipe berubah
+  }, [isOpen, initialData, mode, form, categories]);
+
+  // Reset field kategori & sub-kategori saat tipe berubah
   useEffect(() => {
     if (isOpen) { // Hanya reset jika dialog terbuka
+        form.resetField('category_id', { defaultValue: '' });
         form.resetField('sub_category_id', { defaultValue: '' });
     }
   }, [transactionType, form, isOpen]);
 
+  // Reset sub-kategori saat kategori berubah
+  useEffect(() => {
+    if (isOpen) {
+      form.resetField('sub_category_id', { defaultValue: '' });
+    }
+  }, [selectedCategoryId, form, isOpen]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    const { category_id, ...rest } = values;
+    void category_id;
     const payload = {
-      ...values,
-      account_id: parseInt(values.account_id),
-      sub_category_id: values.sub_category_id ? parseInt(values.sub_category_id) : null,
-      destination_account_id: values.destination_account_id ? parseInt(values.destination_account_id) : null,
+      ...rest,
+      account_id: parseInt(rest.account_id),
+      sub_category_id: rest.sub_category_id ? parseInt(rest.sub_category_id) : null,
+      destination_account_id: rest.destination_account_id ? parseInt(rest.destination_account_id) : null,
     };
     try {
       if (mode === 'add') {
@@ -150,7 +175,70 @@ export default function TransactionFormDialog({ accounts, categories, onFormSubm
             <FormField control={form.control} name="transaction_date" render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Tanggal</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? format(field.value, "PPP") : <span>Pilih tanggal</span>} <CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent></Popover><FormMessage /></FormItem>)} />
             <FormField control={form.control} name="account_id" render={({ field }) => (<FormItem><FormLabel>{transactionType === 'transfer' ? 'Dari Akun' : 'Akun'}</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Pilih akun" /></SelectTrigger></FormControl><SelectContent>{accounts.map(acc => <SelectItem key={acc.ID} value={acc.ID.toString()}>{acc.Name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
             {transactionType === 'transfer' && (<FormField control={form.control} name="destination_account_id" render={({ field }) => (<FormItem><FormLabel>Ke Akun</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Pilih akun tujuan" /></SelectTrigger></FormControl><SelectContent>{accounts.map(acc => <SelectItem key={acc.ID} value={acc.ID.toString()}>{acc.Name}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />)}
-            {transactionType !== 'transfer' && (<FormField control={form.control} name="sub_category_id" render={({ field }) => (<FormItem><FormLabel>Kategori</FormLabel><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Pilih kategori" /></SelectTrigger></FormControl><SelectContent>{categories.filter(cat => cat.Type === transactionType).map(cat => (cat.SubCategories && cat.SubCategories.map(sub => <SelectItem key={sub.ID} value={sub.ID.toString()}>{cat.Name} / {sub.Name}</SelectItem>)))}</SelectContent></Select><FormMessage /></FormItem>)} />)}
+            {transactionType !== 'transfer' && (
+              <>
+                <FormField control={form.control} name="category_id" render={({ field }) => {
+                  const filtered = categories.filter(cat => cat.Type === transactionType);
+                  const hasAny = filtered.some(c => c.SubCategories && c.SubCategories.length > 0);
+                  return (
+                    <FormItem>
+                      <FormLabel>Kategori</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={!hasAny}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={hasAny ? 'Pilih kategori' : 'Belum ada kategori'} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {filtered.length === 0 && (
+                            <SelectItem value="__empty__" disabled>
+                              Belum ada kategori {transactionType === 'expense' ? 'pengeluaran' : 'pemasukan'}
+                            </SelectItem>
+                          )}
+                          {filtered.map(cat => (
+                            <SelectItem key={cat.ID} value={cat.ID.toString()}>
+                              {cat.Name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                        <FormMessage />
+                      </Select>
+                      {!hasAny && (
+                        <p className="text-xs text-muted-foreground">
+                          Tambahkan kategori di halaman <a href="/categories" className="underline text-blue-600 hover:text-blue-800">Kategori</a> terlebih dahulu.
+                        </p>
+                      )}
+                    </FormItem>
+                  );
+                }} />
+                <FormField control={form.control} name="sub_category_id" render={({ field }) => {
+                  if (!selectedCategoryId) return <></>;
+                  return (
+                    <FormItem>
+                      <FormLabel>Sub-Kategori</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Pilih sub-kategori" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {filteredSubCategories.length === 0 && (
+                            <SelectItem value="__empty__" disabled>Kategori ini belum memiliki sub-kategori</SelectItem>
+                          )}
+                          {filteredSubCategories.map(sub => (
+                            <SelectItem key={sub.ID} value={sub.ID.toString()}>
+                              {sub.Name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                        <FormMessage />
+                      </Select>
+                    </FormItem>
+                  );
+                }} />
+              </>
+            )}
             <FormField control={form.control} name="notes" render={({ field }) => (<FormItem><FormLabel>Catatan</FormLabel><FormControl><Input placeholder="Catatan singkat (opsional)" {...field} /></FormControl><FormMessage /></FormItem>)} />
             <Button type="submit" className="w-full">{mode === 'add' ? 'Simpan Transaksi' : 'Simpan Perubahan'}</Button>
           </form>

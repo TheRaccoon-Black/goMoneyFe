@@ -180,20 +180,20 @@ export default function DashboardPage() {
       {/* Two-column main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
         {/* Spending breakdown */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-6">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-6">
           <div className="mb-4">
-            <h2 className="text-base font-semibold text-gray-900">Spending by Category</h2>
-            <p className="text-xs text-gray-500 mt-0.5">This month&apos;s expenses</p>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white">Spending by Category</h2>
+            <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">This month&apos;s expenses</p>
           </div>
           <CategoryDonutChart transactions={transactions} />
         </div>
 
         {/* Accounts */}
-        <div className="lg:col-span-3 bg-white rounded-2xl border border-gray-100 p-6">
+        <div className="lg:col-span-3 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-base font-semibold text-gray-900">Your Accounts</h2>
-              <p className="text-xs text-gray-500 mt-0.5">{accounts.length} active accounts</p>
+              <h2 className="text-base font-semibold text-gray-900 dark:text-white">Your Accounts</h2>
+              <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{accounts.length} active accounts</p>
             </div>
             <AddAccountDialog onAccountAdded={handleAccountAdded} />
           </div>
@@ -202,17 +202,17 @@ export default function DashboardPage() {
               {accounts.map((account) => <AccountCard key={account.ID} account={account} />)}
             </div>
           ) : (
-            <div className="text-center py-8 text-sm text-gray-500">No accounts yet.</div>
+            <div className="text-center py-8 text-sm text-gray-500 dark:text-slate-400">No accounts yet.</div>
           )}
         </div>
       </div>
 
       {/* Recent transactions */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 mt-6">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-6 mt-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-base font-semibold text-gray-900">Recent Transactions</h2>
-            <p className="text-xs text-gray-500 mt-0.5">Your activity for this month</p>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white">Recent Transactions</h2>
+            <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Your activity for this month</p>
           </div>
         </div>
         <div className="max-h-[480px] overflow-y-auto -mx-2 px-2">
@@ -221,7 +221,7 @@ export default function DashboardPage() {
               {groupedTransactions.map(group => (
                 <div key={group.date}>
                   <div className="flex justify-between items-center px-3 py-2 mb-1">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                       {new Date(group.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
                     </p>
                     <div className="flex gap-3 text-xs">
@@ -239,7 +239,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-sm text-gray-500">No transactions yet this month.</p>
+              <p className="text-sm text-gray-500 dark:text-slate-400">No transactions yet this month.</p>
             </div>
           )}
         </div>
